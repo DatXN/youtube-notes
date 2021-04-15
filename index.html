@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Dark Bootstrap 4 theme</title>
+    <title>DatXN - YT Note v1.0</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="css/toggle-bootstrap.css">
     <link rel="stylesheet" href="css/toggle-bootstrap-dark.css">
     <link rel="stylesheet" href="css/toggle-bootstrap-print.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/site.css">
+
 </head>
 
 <body class="bootstrap-dark">
@@ -20,23 +23,21 @@
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand" href="index.html">Navbar</a>
+        <a class="navbar-brand" href="index.html">YT Notes v1.0</a>
 
         <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-            <ul class="navbar-nav mr-auto mt-2 mt-md-0">
+            <ul class="navbar-nav mr-auto mt-3 mt-md-0">
+                <form class="form-inline my-2 my-lg-0">
+                    <input id="inpVideoId" class="form-control mr-sm-2" type="text" placeholder="YouTube Url / ID">
+                </form>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Home
-                        <span class="sr-only">(current)</span>
-                    </a>
+                    <button id="btnLoadVideo" type="button" class="btn btn-outline-primary">Learn</button>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Some other menu item</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#!">Disabled</a>
+                    <a class="nav-link" href="#">About</a>
                 </li>
             </ul>
-            <ul class="navbar-nav mt-2 mt-md-0 my-2">
+            <ul class="navbar-nav mt-3 mt-md-0 my-2">
                 <li class="nav-item mx-2">
                     <a class="nav-link"
                         href="javascript:document.getElementsByTagName('body')[0].setAttribute('class', 'bootstrap-dark');">Dark</a>
@@ -46,9 +47,7 @@
                         href="javascript:document.getElementsByTagName('body')[0].setAttribute('class', 'bootstrap');">Light</a>
                 </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="text" placeholder="Search">
-            </form>
+
         </div>
     </nav>
 
@@ -56,16 +55,152 @@
     <div class="container-fluid">
         <div class="row mt-3">
             <div class="col-md-6">
-                <div class="container-fluid" style="background-color: red; height:480px;">main video</div>
-                <div class="container-fluid d-none d-md-block
-                " style="background-color: orchid; height:500px;">preview</div>
+                <div class="container-fluid">
+                    <div class="video-container">
+                        <div id="ytPlayer"></div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-3">
+                            <h4><span class="badge badge-secondary" id="ytPlayerTime">00:00:00</span></h4>
+                        </div>
+                        <div class="col-7">
+                            <div class="mx-auto" style="text-align: center;">
+                                <button id="btnPreviousPause" type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi-arrow-90deg-left"></i>
+                                </button>
+                                <button id="btnBackward" type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi-skip-backward-fill"></i>
+                                </button>
+                                <button id="btnPlay" type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi-play-fill"></i>
+                                </button>
+                                <button id="btnForward" type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi-skip-forward-fill"></i>
+                                </button>
+                                <button id="btnNextPause" type="button" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi-arrow-90deg-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-2 text-right">
+                            <button type="button" class="btn btn-outline-warning btn-sm">
+                                <i class="bi-textarea-t"></i>
+                                Note
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid d-none d-md-block mt-3">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card text-white bg-dark mb-2">
+                                <div class="card-header">Preview</div>
+                                <div class="card-body">
+                                    <ul>
+                                        <li><span><a href="www.google.com">01:00:01</a></span><span> -
+                                            </span><span>Notes 1</span></li>
+                                        <li><span><a href="www.google.com">01:00:02</a></span><span> -
+                                            </span><span>Notes 2</span></li>
+                                        <li><span><a href="www.google.com">01:00:03</a></span><span> -
+                                            </span><span>Notes 3</span></li>
+                                        <li><span><a href="www.google.com">01:00:04</a></span><span> -
+                                            </span><span>Notes 4</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
             <div class="col-md-6">
-                <div class="container-fluid" style="background-color: green; height:180px;">edit panel</div>
-                <div class="container-fluid" style="background-color: orange; height:50px;">control</div>
-                <div class="container-fluid" style="background-color: yellow; height:500px;">grid</div>
-                <div class="container-fluid d-md-none" style="background-color: lightblue; height:500px;">preview 2
+                <div class="container-fluid">
+                    <form>
+                        <div class="form-row">
+                            <div class="form-group col-9 col-md-10">
+                                <label for="exampleInputEmail1">Notes</label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+                            </div>
+                            <div class="form-group col-3 col-md-2">
+                                <div class="form-group">
+                                    <label for="inputEmail4">Time</label>
+                                    <input type="email" class="form-control" id="inputEmail4" placeholder="00:00:00">
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-sm btn-block btn-outline-primary">Save</button>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button"
+                                        class="btn btn-sm btn-block btn-outline-secondary">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Export To TXT</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Export To Notion</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Time</th>
+                                        <th scope="col">Notes</th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                        <th scope="col">Controls</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">01:00:00</th>
+                                        <td colspan="4">Notes here ...</td>
+                                        <td>X</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">01:12:00</th>
+                                        <td colspan="4">Notes here ...</td>
+                                        <td>X</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">01:13:00</th>
+                                        <td colspan="4">Notes here ...</td>
+                                        <td>X</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid d-md-none">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card text-white bg-dark mb-2">
+                                <div class="card-header">Preview</div>
+                                <div class="card-body">
+                                    <ul>
+                                        <li><span><a href="www.google.com">01:00:01</a></span><span> -
+                                            </span><span>Notes 1</span></li>
+                                        <li><span><a href="www.google.com">01:00:02</a></span><span> -
+                                            </span><span>Notes 2</span></li>
+                                        <li><span><a href="www.google.com">01:00:03</a></span><span> -
+                                            </span><span>Notes 3</span></li>
+                                        <li><span><a href="www.google.com">01:00:04</a></span><span> -
+                                            </span><span>Notes 4</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,8 +215,9 @@
         integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
         crossorigin="anonymous"></script>
     <script src="js/bootstrap.min.js"></script>
-
-
+    <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+    <script src="js/site.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 
 </html>
