@@ -51,12 +51,22 @@ var pageInitialized = false;
       function getVideoId() {
         return _pageData.video.VideoId;
       }
-      function onChanged(ignoreSave) {
+      function setLastPlaytime(playtime) {
+        _pageData.video.LastPlayTime = playtime;
+        onChanged(false, true);
+      }
+      function getLastPlaytime() {
+        return _pageData.video.LastPlayTime;
+      }
+
+      function onChanged(ignoreSave, ignoreTriggerChange) {
         if (!!ignoreSave == false) {
           savePageData();
         }
-        for (var i = 0; i < subscribedFns.length; i++) {
-          subscribedFns[i]();
+        if (!!ignoreTriggerChange == false) {
+          for (var i = 0; i < subscribedFns.length; i++) {
+            subscribedFns[i]();
+          }
         }
       }
 
@@ -66,6 +76,8 @@ var pageInitialized = false;
       var publicInterface = {
         setVideoId: setVideoId,
         getVideoId: getVideoId,
+        setLastPlaytime: setLastPlaytime,
+        getLastPlaytime: getLastPlaytime,
         subscribe: subscribe,
         onChanged: onChanged,
       };
@@ -233,8 +245,9 @@ var pageInitialized = false;
         function showTime() {
           var time = pageControls.$ytPlayer.getCurrentTime();
           var newTimeValue = formatTime(time);
-          if (pageControls.$ytPlayerTime.text() != newTimeValue)
+          if (pageControls.$ytPlayerTime.text() != newTimeValue) {
             pageControls.$ytPlayerTime.text(newTimeValue);
+          }
         }
 
         // 4. The API will call this function when the video player is ready.
@@ -243,7 +256,15 @@ var pageInitialized = false;
         }
         function onVideoModelChange() {
           if (!!model.video.getVideoId()) {
-            pageControls.$ytPlayer.loadVideoById(model.video.getVideoId());
+            if (!!model.video.getLastPlaytime()) {
+              pageControls.$ytPlayer.loadVideoById(
+                model.video.getVideoId(),
+                model.video.getLastPlaytime()
+              );
+            } else {
+              pageControls.$ytPlayer.loadVideoById(model.video.getVideoId());
+            }
+
             pageControls.$inpVideoId.val(model.video.getVideoId());
             pageControls.$ctnVideo.show();
           } else {
@@ -309,6 +330,7 @@ var pageInitialized = false;
         pageControls.$inpNoteTime.val("");
         pageControls.$txtNote.val("");
         pageControls.$inpNoteTime.focus();
+        pageControls.$inpNoteTime.removeClass("is-invalid");
       }
       function onNotesDataChanged() {
         clearEditPanel();
@@ -386,11 +408,21 @@ var pageInitialized = false;
         InitHotKeys();
         InitEditPanel();
       }
+
+      function timeValidation(strTime) {
+        var timeFormat = /^(?:2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]$/;
+        return timeFormat.test(strTime);
+      }
       function saveNotes() {
-        model.notes.saveNotes(
-          pageControls.$inpNoteTime.val(),
-          pageControls.$txtNote.val()
-        );
+        if (timeValidation(pageControls.$inpNoteTime.val())) {
+          pageControls.$inpNoteTime.removeClass("is-invalid");
+          model.notes.saveNotes(
+            pageControls.$inpNoteTime.val(),
+            pageControls.$txtNote.val()
+          );
+        } else {
+          pageControls.$inpNoteTime.addClass("is-invalid");
+        }
       }
       function beginAddNewNotes() {
         clearEditPanel();
@@ -456,13 +488,21 @@ var pageInitialized = false;
           e.preventDefault();
           clearEditPanel();
         });
-        function beginEdit(keyTime, valueNote) {
-          clearEditPanel();
-          pageControls.$inpNoteTime.val(keyTime);
-          pageControls.$txtNote.val(valueNote);
-          pageControls.$ytPlayer.seekTo(convertToSecValue(keyTime), true);
-          pageControls.$ytPlayer.playVideo();
-        }
+
+        pageControls.$inpNoteTime.keypress(function (event) {
+          var keycode = event.keyCode ? event.keyCode : event.which;
+          if (keycode == "13") {
+            saveNotes();
+          }
+        });
+
+        pageControls.$txtNote.keydown(function (e) {
+          if (e.key == "Tab") {
+            e.preventDefault();
+            pageControls.$inpNoteTime.focus();
+          }
+        });
+
         pageControls.$gridNotes.on("click", ".dx-btn-edit-note", function (e) {
           e.preventDefault();
           var keyTime = getKeyTime($(e.currentTarget));
@@ -475,7 +515,6 @@ var pageInitialized = false;
           model.notes.deleteNote(keyTime);
         });
         var clipboard = new ClipboardJS(".btnExportFullHtml");
-
         clipboard.on("success", function (e) {
           console.info("Action:", e.action);
           console.info("Text:", e.text);
@@ -493,6 +532,18 @@ var pageInitialized = false;
           e.preventDefault();
           beginAddNewNotes();
         });
+
+        $(window).bind("beforeunload", function (eventObject) {
+          var time = pageControls.$ytPlayer.getCurrentTime();
+          model.video.setLastPlaytime(time);
+        });
+      }
+      function beginEdit(keyTime, valueNote) {
+        clearEditPanel();
+        pageControls.$inpNoteTime.val(keyTime);
+        pageControls.$txtNote.val(valueNote);
+        pageControls.$ytPlayer.seekTo(convertToSecValue(keyTime), true);
+        pageControls.$ytPlayer.playVideo();
       }
       function getKeyTime($target) {
         return $($target).parents("tr").first().find("th").html();
