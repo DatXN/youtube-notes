@@ -7,29 +7,29 @@ var pageInitialized = false;
     var _pageData;
     function hasPageData() {
       return (
-        !!_pageData && (!!_pageData.video.VideoId || !!_pageData.notes > 0)
+        !!_pageData &&
+        (!!_pageData.video.VideoId || Object.keys(_pageData.notes).length > 0)
       );
     }
-    function resetPageData(ignoreLoadPageData) {
+    function resetPageData(ignoreOnchangeTrigger) {
       _pageData.video = {};
       _pageData.notes = {};
       savePageData();
-      if (!!ignoreLoadPageData == false) {
-        loadPageData();
+      if (!!ignoreOnchangeTrigger == false) {
+        onChangedPageData();
       }
     }
     function loadPageData() {
       _pageData = JSON.parse(
         localStorage.getItem("datxn_yt_note_v1_page_data")
       );
-      if (hasPageData()) {
-        onChangedPageData();
-      } else {
+      if (!hasPageData()) {
         _pageData = {
           video: {},
           notes: {},
         };
       }
+      onChangedPageData();
     }
     function savePageData() {
       localStorage.setItem(
@@ -149,6 +149,9 @@ var pageInitialized = false;
         PNL_PREVIEW_ONE: "#panelPreviewOne",
         BTN_EXPORT_FULL_HTML: "#btnExportFullHtml",
         BTN_ADD_NOTE: "#btnAddNotes",
+        MODAL_WARNING: "#modalWarning",
+        BTN_MODAL_YES: "#btnModalYes",
+        CTN_VIDEO: "#ctnVideo",
       },
     };
     var pageControls = {
@@ -168,7 +171,10 @@ var pageInitialized = false;
       $gridNotes: $(constantOfView.IDS.GRID_NOTES),
       $panelPreviewOne: $(constantOfView.IDS.PNL_PREVIEW_ONE),
       $btnExportFullHtml: $(constantOfView.IDS.BTN_EXPORT_FULL_HTML),
-      $btnAddNote: $(constantOfView.IDS.BTN_ADD_NOTE),
+      $btnAddNotes: $(constantOfView.IDS.BTN_ADD_NOTE),
+      $modalWarning: $(constantOfView.IDS.MODAL_WARNING),
+      $btnModalYes: $(constantOfView.IDS.BTN_MODAL_YES),
+      $ctnVideo: $(constantOfView.IDS.CTN_VIDEO),
     };
     //#endregion
     //#region View Modules
@@ -236,8 +242,14 @@ var pageInitialized = false;
           model.loadPageData();
         }
         function onVideoModelChange() {
-          pageControls.$ytPlayer.loadVideoById(model.video.getVideoId());
-          pageControls.$inpVideoId.val(model.video.getVideoId());
+          if (!!model.video.getVideoId()) {
+            pageControls.$ytPlayer.loadVideoById(model.video.getVideoId());
+            pageControls.$inpVideoId.val(model.video.getVideoId());
+            pageControls.$ctnVideo.show();
+          } else {
+            pageControls.$ytPlayer.stopVideo();
+            pageControls.$ctnVideo.hide();
+          }
         }
         model.video.subscribe(onVideoModelChange);
       }
@@ -296,10 +308,10 @@ var pageInitialized = false;
       function clearEditPanel() {
         pageControls.$inpNoteTime.val("");
         pageControls.$txtNote.val("");
+        pageControls.$inpNoteTime.focus();
       }
       function onNotesDataChanged() {
         clearEditPanel();
-        console.log(model.notes.getNotes());
         showNotesGrid();
         showNotesPreview();
       }
@@ -391,13 +403,39 @@ var pageInitialized = false;
           pageControls.$inpNoteTime.focus();
         }
       }
+      function prepareNewSession() {
+        if (!!pageControls.$inpVideoId.val()) {
+          model.resetPageData(true);
+          model.loadPageData();
+          model.video.setVideoId(pageControls.$inpVideoId.val());
+        } else {
+          model.resetPageData();
+        }
+      }
       // Events
       function RegisterEvents() {
+        var yesClick = false;
         pageControls.$btnLoadVideo.on("click", function (e) {
           e.preventDefault();
-
-          model.video.setVideoId(pageControls.$inpVideoId.val());
+          if (model.hasPageData()) {
+            if (pageControls.$inpVideoId.val() != model.video.getVideoId()) {
+              yesClick = false;
+              pageControls.$modalWarning.modal();
+            }
+          } else {
+            prepareNewSession();
+          }
         });
+        pageControls.$modalWarning.on("hidden.bs.modal", function (e) {
+          if (!yesClick) pageControls.$inpVideoId.val(model.video.getVideoId());
+        });
+        pageControls.$btnModalYes.on("click", function (e) {
+          e.preventDefault();
+          yesClick = true;
+          pageControls.$modalWarning.modal("hide");
+          prepareNewSession();
+        });
+
         pageControls.$btnPlay.on("click", function (e) {
           e.preventDefault();
           playPauseVideo();
@@ -451,7 +489,7 @@ var pageInitialized = false;
           console.error("Trigger:", e.trigger);
         });
 
-        pageControls.$btnAddNote.on("click", function (e) {
+        pageControls.$btnAddNotes.on("click", function (e) {
           e.preventDefault();
           beginAddNewNotes();
         });
