@@ -107,6 +107,17 @@ var pageInitialized = false;
       function getNotes() {
         return _pageData.notes;
       }
+      function getPreviewNotes() {
+        const ordered = Object.keys(_pageData.notes)
+          .sort()
+
+          .reduce((obj, key) => {
+            obj[key] = _pageData.notes[key];
+            return obj;
+          }, {});
+
+        return ordered;
+      }
       function onChanged(ignoreSave) {
         if (!!ignoreSave == false) {
           savePageData();
@@ -124,6 +135,7 @@ var pageInitialized = false;
         saveNotes: saveNotes,
         getNotes: getNotes,
         deleteNote: deleteNote,
+        getPreviewNotes: getPreviewNotes,
       };
       return publicInterface;
     })();
@@ -366,8 +378,21 @@ var pageInitialized = false;
         pageControls.$panelPreviewOne.html("");
         pageControls.$panelPreviewTwo.html("");
         var $newUl = $("<ul/>");
-        for (const [key, value] of Object.entries(model.notes.getNotes())) {
+        var $newUl2 = $("<ul/>");
+        var previewData = model.notes.getPreviewNotes();
+        for (const [key, value] of Object.entries(previewData)) {
           $newUl.append(
+            "<li class='mt-3'><div class='row'><div class='col-2'><a href='https://youtu.be/" +
+              model.video.getVideoId() +
+              "?t=" +
+              convertToSecValue(key) +
+              "'>" +
+              key +
+              "</a></div><div class='col-10' style='white-space: pre-line;'>" +
+              value +
+              "</div></div></li>"
+          );
+          $newUl2.append(
             "<li class='mt-3'><div class='row'><div class='col-2'><a href='https://youtu.be/" +
               model.video.getVideoId() +
               "?t=" +
@@ -380,7 +405,7 @@ var pageInitialized = false;
           );
         }
         pageControls.$panelPreviewOne.append($newUl);
-        pageControls.$panelPreviewTwo.append($newUl);
+        pageControls.$panelPreviewTwo.append($newUl2);
       }
       function CopyToClipboard(element) {
         var doc = document,
