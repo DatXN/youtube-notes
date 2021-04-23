@@ -159,6 +159,7 @@ var pageInitialized = false;
         INP_NOTE_TIME: "#inpNoteTime",
         GRID_NOTES: "#gridNotes",
         PNL_PREVIEW_ONE: "#panelPreviewOne",
+        PNL_PREVIEW_TWO: "#panelPreviewTwo",
         BTN_EXPORT_FULL_HTML: "#btnExportFullHtml",
         BTN_ADD_NOTE: "#btnAddNotes",
         MODAL_WARNING: "#modalWarning",
@@ -182,6 +183,7 @@ var pageInitialized = false;
       $inpNoteTime: $(constantOfView.IDS.INP_NOTE_TIME),
       $gridNotes: $(constantOfView.IDS.GRID_NOTES),
       $panelPreviewOne: $(constantOfView.IDS.PNL_PREVIEW_ONE),
+      $panelPreviewTwo: $(constantOfView.IDS.PNL_PREVIEW_TWO),
       $btnExportFullHtml: $(constantOfView.IDS.BTN_EXPORT_FULL_HTML),
       $btnAddNotes: $(constantOfView.IDS.BTN_ADD_NOTE),
       $modalWarning: $(constantOfView.IDS.MODAL_WARNING),
@@ -362,6 +364,7 @@ var pageInitialized = false;
       }
       function showNotesPreview() {
         pageControls.$panelPreviewOne.html("");
+        pageControls.$panelPreviewTwo.html("");
         var $newUl = $("<ul/>");
         for (const [key, value] of Object.entries(model.notes.getNotes())) {
           $newUl.append(
@@ -377,6 +380,7 @@ var pageInitialized = false;
           );
         }
         pageControls.$panelPreviewOne.append($newUl);
+        pageControls.$panelPreviewTwo.append($newUl);
       }
       function CopyToClipboard(element) {
         var doc = document,
