@@ -341,7 +341,7 @@ var pageInitialized = false;
         );
       }
       function clearEditPanel() {
-        pageControls.$inpNoteTime.val("");
+        pageControls.$inpNoteTime.val("00");
         pageControls.$txtNote.val("");
         pageControls.$inpNoteTime.focus();
         pageControls.$inpNoteTime.removeClass("is-invalid");
