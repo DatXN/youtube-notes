@@ -177,6 +177,7 @@ var pageInitialized = false;
         MODAL_WARNING: "#modalWarning",
         BTN_MODAL_YES: "#btnModalYes",
         CTN_VIDEO: "#ctnVideo",
+        BTN_CLEAR_RESET: "#btnClearReset",
       },
     };
     var pageControls = {
@@ -201,7 +202,9 @@ var pageInitialized = false;
       $modalWarning: $(constantOfView.IDS.MODAL_WARNING),
       $btnModalYes: $(constantOfView.IDS.BTN_MODAL_YES),
       $ctnVideo: $(constantOfView.IDS.CTN_VIDEO),
+      $btnClearReset: $(constantOfView.IDS.BTN_CLEAR_RESET),
     };
+    var yesClick = false;
     //#endregion
     //#region View Modules
     var pageHandler = (function () {
@@ -474,19 +477,26 @@ var pageInitialized = false;
         }
       }
       // Events
+      function clearResetAndLoadVideo() {
+        if (model.hasPageData()) {
+          if (pageControls.$inpVideoId.val() != model.video.getVideoId()) {
+            yesClick = false;
+            pageControls.$modalWarning.modal();
+          }
+        } else {
+          prepareNewSession();
+        }
+      }
       function RegisterEvents() {
-        var yesClick = false;
         pageControls.$btnLoadVideo.on("click", function (e) {
           e.preventDefault();
-          if (model.hasPageData()) {
-            if (pageControls.$inpVideoId.val() != model.video.getVideoId()) {
-              yesClick = false;
-              pageControls.$modalWarning.modal();
-            }
-          } else {
-            prepareNewSession();
-          }
+          clearResetAndLoadVideo();
         });
+        pageControls.$btnClearReset.on("click", function (e) {
+          e.preventDefault();
+          clearResetAndLoadVideo();
+        });
+
         pageControls.$modalWarning.on("hidden.bs.modal", function (e) {
           if (!yesClick) pageControls.$inpVideoId.val(model.video.getVideoId());
         });
